@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ClientManagement } from './ClientManagement';
 import { PatientDashboard } from './PatientDashboard';
@@ -9,6 +9,37 @@ type Tab = 'clients' | 'patients';
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('patients');
   const { user, signOut } = useAuth();
+
+  useEffect(()=> {
+     const searchParams = new URLSearchParams(window.location.search);
+    const getCode = (searchParams.get("code"))
+    const currentClientToken = localStorage.getItem('currentClientSecret') || ''
+
+    if (getCode && currentClientToken) {
+      exchangeCodeForToken(getCode, currentClientToken).then(()=> {
+        window.history.replaceState({}, "", window.location.pathname);
+      })
+    }
+  }, [])
+
+  const exchangeCodeForToken = async (code: string, clientSecret: string) => {
+    const payload = {
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: window.location.origin,
+        client_id: clientSecret,
+    };
+    const response = await fetch(`https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams(payload).toString()
+    })
+    const data = await response.json()
+    localStorage.setItem('currentTokenData', JSON.stringify(data))
+  }
+ 
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,6 +89,7 @@ export function Dashboard() {
                   Patient Data
                 </div>
               </button>
+
               <button
                 onClick={() => setActiveTab('clients')}
                 className={`pb-4 px-1 border-b-2 font-medium transition ${

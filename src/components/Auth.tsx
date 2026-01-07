@@ -101,3 +101,15 @@ export function Auth() {
     </div>
   );
 }
+
+
+// const params = new URLSearchParams({
+//             response_type: 'code',
+//             client_id: "8592a008-0799-42d7-8fa9-a1d1a2d7edc9",
+//             redirect_uri: "http://localhost:5173",
+//             scope: "patient/Patient.read patient/Encounter.read fhirUser user/List.read patient/List.read offline_access",
+//             aud: "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4",
+//             login_hint:'Patient/FHIRTWO'
+//         });
+//         const authUrl = `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?${params.toString()}`
+//         console.log(authUrl);

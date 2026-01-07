@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, Client, EHRConfiguration } from '../lib/supabase';
+import { supabase, Client } from '../lib/supabase';
 import { Plus, Settings, Trash2, Building2 } from 'lucide-react';
 
 export function ClientManagement() {
@@ -11,9 +11,7 @@ export function ClientManagement() {
 
   const [newClientName, setNewClientName] = useState('');
   const [ehrSystem, setEhrSystem] = useState<'EPIC' | 'CERNER'>('EPIC');
-  const [apiEndpoint, setApiEndpoint] = useState('');
   const [clientIdCredential, setClientIdCredential] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
 
   useEffect(() => {
     fetchClients();
@@ -25,7 +23,6 @@ export function ClientManagement() {
       .from('clients')
       .select('*')
       .order('created_at', { ascending: false });
-
     if (!error && data) {
       setClients(data);
     }
@@ -62,9 +59,7 @@ export function ClientManagement() {
     setSelectedClient(client);
     setShowConfigModal(true);
     setEhrSystem('EPIC');
-    setApiEndpoint('');
     setClientIdCredential('');
-    setClientSecret('');
   };
 
   const saveConfiguration = async (e: React.FormEvent) => {
@@ -77,11 +72,30 @@ export function ClientManagement() {
         {
           client_id: selectedClient.id,
           ehr_system: ehrSystem,
-          api_endpoint: apiEndpoint,
           client_id_credential: clientIdCredential,
-          client_secret: clientSecret,
+          response_type: 'code',
+          redirect_uri: window.location.origin,
+          scope: "patient/Patient.read patient/Encounter.read openid fhirUser",
+          aud: "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4",
+          state: "12345",
+          login_hint:"Patient/FHIRTWO",
         },
       ], { onConflict: 'client_id,ehr_system' });
+
+      const params = new URLSearchParams({
+          // client_id: selectedClient.id,
+          ehr_system: ehrSystem,
+          client_id: clientIdCredential,
+          response_type: 'code',
+          redirect_uri: window.location.origin,
+          scope: "patient/Patient.read patient/Encounter.read openid fhirUser",
+          aud: "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4",
+          state: "12345",
+          login_hint:"Patient/FHIRTWO",
+        });
+        localStorage.setItem('currentClientSecret', clientIdCredential)
+        window.open(`https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?${params.toString()}`, '_blank')
+
 
     if (!error) {
       setShowConfigModal(false);
@@ -128,6 +142,7 @@ export function ClientManagement() {
                   </p>
                 </div>
               </div>
+
               <div className="flex gap-2">
                 <button
                   onClick={() => openConfigModal(client)}
@@ -207,39 +222,12 @@ export function ClientManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  API Endpoint
-                </label>
-                <input
-                  type="url"
-                  value={apiEndpoint}
-                  onChange={(e) => setApiEndpoint(e.target.value)}
-                  placeholder="https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Client ID
                 </label>
                 <input
                   type="text"
                   value={clientIdCredential}
                   onChange={(e) => setClientIdCredential(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Client Secret / Access Token
-                </label>
-                <input
-                  type="password"
-                  value={clientSecret}
-                  onChange={(e) => setClientSecret(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   required
                 />
