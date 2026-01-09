@@ -11,23 +11,23 @@ export function Dashboard() {
   const { user, signOut } = useAuth();
 
   useEffect(()=> {
-     const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(window.location.search);
     const getCode = (searchParams.get("code"))
-    const currentClientToken = localStorage.getItem('currentClientSecret') || ''
+    const epicClientId = localStorage.getItem('epicClientId') || ''
 
-    if (getCode && currentClientToken) {
-      exchangeCodeForToken(getCode, currentClientToken).then(()=> {
+    if (getCode && epicClientId) {
+      exchangeCodeForToken(getCode, epicClientId).then(()=> {
         window.history.replaceState({}, "", window.location.pathname);
       })
     }
   }, [])
 
-  const exchangeCodeForToken = async (code: string, clientSecret: string) => {
+  const exchangeCodeForToken = async (code: string, clientId: string) => {
     const payload = {
         grant_type: 'authorization_code',
         code,
         redirect_uri: window.location.origin,
-        client_id: clientSecret,
+        client_id: clientId,
     };
     const response = await fetch(`https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token`, {
       method: 'POST',
@@ -37,7 +37,7 @@ export function Dashboard() {
       body: new URLSearchParams(payload).toString()
     })
     const data = await response.json()
-    localStorage.setItem('currentTokenData', JSON.stringify(data))
+    localStorage.setItem('epicClientToken', JSON.stringify(data))
   }
  
 

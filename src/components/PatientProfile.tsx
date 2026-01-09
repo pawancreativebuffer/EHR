@@ -1,6 +1,5 @@
 import {
   User,
-  Calendar,
   Phone,
   Mail,
   MapPin,
@@ -10,7 +9,7 @@ import {
 } from "lucide-react"
 
 type PatientProps = {
-  patient: any
+  patient: Object
 }
 
 export default function PatientProfile({ patient }: PatientProps) {

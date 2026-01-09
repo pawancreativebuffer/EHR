@@ -38,29 +38,34 @@ export function PatientDashboard() {
     if (searchTerm.trim()){
       fetchPatients();
     }
-  }, [searchTerm]);
+  }, [searchTerm, selectedEHR]);
 
   const fetchPatients = async () => {
-    const authData = JSON.parse(localStorage.getItem('currentTokenData') || '')
-    const accessToken = authData?.access_token
-    setLoading(true)
+    if(selectedEHR == 'EPIC') {
+      const authData = JSON.parse(localStorage.getItem('epicClientToken') || '')
+      const accessToken = authData?.access_token
+      setLoading(true)
 
-    if (!accessToken) {
-      console.error("Access token not found")
+      if (!accessToken) {
+        console.error("Access token not found")
+        setLoading(false)
+        return
+      }
+
+      const response = await fetch(`https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/${searchTerm}`, {
+        method: 'GET',
+        headers: {
+          "Accept": "application/fhir+json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+      })
+      const data = await response.json()
+      setPatients(data)
       setLoading(false)
-      return
-    }
 
-    const response = await fetch(`https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/${searchTerm}`, {
-      method: 'GET',
-      headers: {
-        "Accept": "application/fhir+json",
-        "Authorization": `Bearer ${accessToken}`,
-      },
-    })
-    const data = await response.json()
-    setPatients(data)
-    setLoading(false)
+    } else {
+      console.log('wefwe')
+    }
   };
 
   // const fetchPatientFromEHR = async (e: React.FormEvent) => {

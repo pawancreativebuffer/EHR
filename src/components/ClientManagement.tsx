@@ -66,41 +66,44 @@ export function ClientManagement() {
     e.preventDefault();
     if (!selectedClient) return;
 
-    const { error } = await supabase
-      .from('ehr_configurations')
-      .upsert([
-        {
-          client_id: selectedClient.id,
-          ehr_system: ehrSystem,
-          client_id_credential: clientIdCredential,
-          response_type: 'code',
-          redirect_uri: window.location.origin,
-          scope: "patient/Patient.read patient/Encounter.read openid fhirUser",
-          aud: "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4",
-          state: "12345",
-          login_hint:"Patient/FHIRTWO",
-        },
-      ], { onConflict: 'client_id,ehr_system' });
-
-      const params = new URLSearchParams({
-          // client_id: selectedClient.id,
+    if(ehrSystem == 'EPIC') {
+        const params = new URLSearchParams({
           ehr_system: ehrSystem,
           client_id: clientIdCredential,
           response_type: 'code',
           redirect_uri: window.location.origin,
-          scope: "patient/Patient.read patient/Encounter.read openid fhirUser",
+          scope: "patient/Patient.read patient/Binary.read patient/Observation.read patient/Binary.search patient/Encounter.read openid fhirUser",
           aud: "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4",
           state: "12345",
           login_hint:"Patient/FHIRTWO",
         });
-        localStorage.setItem('currentClientSecret', clientIdCredential)
-        window.open(`https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?${params.toString()}`, '_blank')
-
-
-    if (!error) {
-      setShowConfigModal(false);
-      setSelectedClient(null);
+        localStorage.setItem('epicClientId', clientIdCredential)
+        window.open(`https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?${params.toString()}`)
+    } else {
+      console.log('dd')
     }
+
+    // const { error } = await supabase
+    //   .from('ehr_configurations')
+    //   .upsert([
+    //     {
+    //       client_id: selectedClient.id,
+    //       ehr_system: ehrSystem,
+    //       client_id_credential: clientIdCredential,
+    //       response_type: 'code',
+    //       redirect_uri: window.location.origin,
+    //       scope: "patient/Patient.read patient/Encounter.read openid fhirUser",
+    //       aud: "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4",
+    //       state: "12345",
+    //       login_hint:"Patient/FHIRTWO",
+    //     },
+    //   ], { onConflict: 'client_id,ehr_system' });
+
+
+    // if (!error) {
+    //   setShowConfigModal(false);
+    //   setSelectedClient(null);
+    // }
   };
 
   if (loading) {
