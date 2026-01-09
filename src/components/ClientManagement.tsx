@@ -118,13 +118,15 @@ export function ClientManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Client Management</h2>
-        <button
-          onClick={() => setShowAddClient(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          <Plus className="w-4 h-4" />
-          Add Client
-        </button>
+        {clients?.length < 1 && 
+          <button
+            onClick={() => setShowAddClient(true)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            <Plus className="w-4 h-4" />
+            Add Client
+          </button>
+        }
       </div>
 
       <div className="grid gap-4">

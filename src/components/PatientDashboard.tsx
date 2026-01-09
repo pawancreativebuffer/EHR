@@ -143,7 +143,7 @@ export function PatientDashboard() {
               onChange={(e) => setSelectedEHR(e.target.value as 'EPIC' | 'CERNER' | 'ALL')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              <option value="ALL">All Systems</option>
+              <option value="ALL" disabled>Select</option>
               <option value="EPIC">EPIC</option>
               <option value="CERNER">CERNER</option>
             </select>
